@@ -1,0 +1,263 @@
+.flow-page {
+  min-height: 100vh;
+  background: var(--ink);
+  color: var(--paper);
+}
+.flow-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 50px 28px 90px;
+}
+.flow-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 55px;
+  color: var(--muted-light);
+  text-decoration: none;
+  font-size: 11px;
+}
+.flow-grid {
+  display: grid;
+  grid-template-columns: 1fr 0.8fr;
+  gap: 70px;
+  align-items: start;
+}
+.flow-kicker {
+  color: var(--orange);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+.flow-title {
+  margin: 14px 0;
+  font-size: clamp(38px, 5vw, 64px);
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+}
+.flow-title em {
+  color: var(--orange);
+  font-style: normal;
+}
+.flow-copy {
+  max-width: 450px;
+  color: var(--muted-light);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.form-card,
+.summary-card,
+.instruction-card {
+  padding: 25px;
+  border: 1px solid #ffffff1c;
+  border-radius: 6px;
+  background: #ffffff08;
+}
+.form-card {
+  display: grid;
+  gap: 17px;
+}
+.field {
+  display: grid;
+  gap: 7px;
+}
+.field label {
+  color: #abb7c0;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid #ffffff1c;
+  border-radius: 4px;
+  padding: 12px;
+  outline: none;
+  background: #101e2c;
+  color: #fff;
+  font-size: 12px;
+}
+.field textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--orange);
+}
+.radio-grid {
+  display: grid;
+  gap: 8px;
+}
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border: 1px solid #ffffff1c;
+  border-radius: 4px;
+  color: #d8e0e4;
+  font-size: 12px;
+  cursor: pointer;
+}
+.radio-option:has(input:checked) {
+  border-color: var(--orange);
+  background: #ff5a1915;
+}
+.radio-option input {
+  accent-color: var(--orange);
+}
+.pay-button {
+  width: 100%;
+  justify-content: center;
+  margin-top: 4px;
+}
+.payment-note {
+  color: #8194a1;
+  font-size: 10px;
+  text-align: center;
+}
+.pay-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+.form-error {
+  margin: 0;
+  color: #ffb39b;
+  font-size: 11px;
+  line-height: 1.45;
+}
+.summary-card {
+  position: sticky;
+  top: 20px;
+  background: linear-gradient(150deg, #ff5a19, #8f2419);
+  border: 0;
+}
+.summary-card h2 {
+  margin: 0 0 23px;
+  font-size: 24px;
+}
+.countdown {
+  display: flex;
+  gap: 8px;
+  margin: 20px 0;
+}
+.countdown span {
+  flex: 1;
+  padding: 9px 5px;
+  border: 1px solid #ffffff35;
+  border-radius: 3px;
+  color: #ffffffb5;
+  font-size: 9px;
+  text-align: center;
+}
+.countdown strong {
+  display: block;
+  color: #fff;
+  font-size: 18px;
+}
+.summary-card p {
+  margin: 0;
+  color: #ffffffb5;
+  font-size: 11px;
+}
+.summary-fee {
+  margin: 35px 0 18px;
+  padding-top: 16px;
+  border-top: 1px solid #ffffff42;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+}
+.summary-fee strong {
+  font-size: 37px;
+  letter-spacing: -0.05em;
+}
+.summary-fee span {
+  font-size: 10px;
+}
+.summary-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  color: #fff;
+  font-size: 11px;
+  line-height: 2.2;
+}
+.summary-list li {
+  display: flex;
+  justify-content: space-between;
+}
+.summary-list span {
+  color: #ffffffa8;
+}
+.success-mark {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 23px;
+  border-radius: 50%;
+  background: #9aca5d;
+  color: var(--ink);
+  font-size: 30px;
+}
+.reference {
+  display: inline-block;
+  margin: 20px 0 26px;
+  padding: 9px 11px;
+  border: 1px solid #ffffff22;
+  border-radius: 3px;
+  color: var(--yellow);
+  font:
+    11px Consolas,
+    monospace;
+}
+.instruction-card {
+  margin-top: 20px;
+}
+.instruction-card h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+.steps {
+  display: grid;
+  gap: 15px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.steps li {
+  display: flex;
+  gap: 11px;
+  color: var(--muted-light);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.steps b {
+  min-width: 22px;
+  color: var(--orange);
+}
+@media (max-width: 760px) {
+  .flow-main {
+    padding: 30px 18px 60px;
+  }
+  .flow-back {
+    margin-bottom: 36px;
+  }
+  .flow-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+  .summary-card {
+    position: static;
+    order: -1;
+  }
+  .flow-title {
+    font-size: 42px;
+  }
+}

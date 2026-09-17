@@ -1,0 +1,133 @@
+.sidebar {
+  width: 250px;
+  flex: 0 0 250px;
+  background: var(--ink);
+  color: #aebdca;
+  display: flex;
+  flex-direction: column;
+  padding: 28px 16px 20px;
+}
+.brand-block {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 0 12px 28px;
+  color: #fff;
+}
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #fff;
+}
+.brand-block strong,
+.brand-block span {
+  display: block;
+  line-height: 1.1;
+}
+.brand-block strong {
+  font-size: 14px;
+  letter-spacing: 0.11em;
+}
+.brand-block span {
+  font-size: 8px;
+  letter-spacing: 0.16em;
+  color: #8297a9;
+  margin-top: 4px;
+}
+.close-menu {
+  display: none;
+}
+.node-card {
+  margin: 0 8px 26px;
+  padding: 13px 12px;
+  border: 1px solid #294051;
+  border-radius: 6px;
+}
+.node-card span,
+.node-card strong {
+  display: block;
+}
+.node-card span {
+  font-size: 10px;
+  color: #7891a3;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+.node-card strong {
+  color: #f4f7f8;
+  font-size: 12px;
+  margin-top: 7px;
+}
+.sidebar nav {
+  display: grid;
+  gap: 5px;
+}
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 0 13px;
+  color: #91a4b4;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 13px;
+}
+.sidebar nav a svg {
+  font-size: 19px;
+}
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  background: #263b4b;
+  color: var(--gold);
+}
+.sidebar nav a.active {
+  box-shadow: inset 3px 0 var(--gold);
+}
+.sidebar-footer {
+  margin-top: auto;
+  padding: 18px 12px 0;
+  border-top: 1px solid #294051;
+  color: #7d92a2;
+  font-size: 11px;
+}
+.sidebar-footer div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.sidebar-footer a {
+  color: var(--gold);
+  text-decoration: none;
+}
+.sidebar-footer small {
+  font-size: 10px;
+  color: #5f7585;
+}
+@media (max-width: 760px) {
+  .sidebar {
+    position: fixed;
+    z-index: 10;
+    inset: 0 auto 0 0;
+    width: 260px;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 10px 0 30px #08131f55;
+  }
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+  .close-menu {
+    display: grid;
+    place-items: center;
+    margin-left: auto;
+    border: 0;
+    background: transparent;
+    color: #aebdca;
+    font-size: 20px;
+    cursor: pointer;
+  }
+}

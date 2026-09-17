@@ -1,0 +1,118 @@
+.public-header {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+.public-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--paper);
+  text-decoration: none;
+}
+.public-brand img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 9px;
+}
+.public-brand strong,
+.public-brand small {
+  display: block;
+  line-height: 1;
+}
+.public-brand strong {
+  font-size: 14px;
+  letter-spacing: 0.16em;
+}
+.public-brand small {
+  color: var(--muted-light);
+  font-size: 8px;
+  letter-spacing: 0.24em;
+  margin-top: 5px;
+}
+.public-nav {
+  display: flex;
+  gap: 30px;
+}
+.public-nav a {
+  color: var(--muted-light);
+  font-size: 12px;
+  text-decoration: none;
+}
+.public-nav a:hover {
+  color: var(--paper);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.outline-button,
+.mobile-menu {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #ffffff33;
+  border-radius: 5px;
+  padding: 10px 13px;
+  background: transparent;
+  color: var(--paper);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.outline-button svg {
+  color: var(--orange);
+}
+.mobile-menu {
+  display: none;
+  padding: 6px;
+  font-size: 22px;
+}
+.public-nav a {
+  transition: color 0.2s ease;
+}
+@media (max-width: 650px) {
+  .public-header {
+    padding: 18px 18px;
+  }
+  .public-nav {
+    display: none;
+    position: absolute;
+    top: 70px;
+    left: 14px;
+    right: 14px;
+    z-index: 5;
+    flex-direction: column;
+    gap: 0;
+    padding: 8px;
+    border: 1px solid #ffffff1c;
+    border-radius: 7px;
+    background: #172534f5;
+    box-shadow: 0 16px 35px #0008;
+  }
+  .menu-open .public-nav {
+    display: flex;
+  }
+  .public-nav a {
+    padding: 13px 12px;
+    border-radius: 4px;
+  }
+  .public-nav a:hover {
+    background: #ffffff0d;
+  }
+  .public-header {
+    position: relative;
+  }
+  .mobile-menu {
+    display: flex;
+  }
+  .outline-button {
+    padding: 9px 11px;
+  }
+}
