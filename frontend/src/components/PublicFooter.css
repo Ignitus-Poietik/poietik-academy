@@ -1,0 +1,130 @@
+.public-footer {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 32px 42px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid var(--line);
+  color: #7b7167;
+  font-size: 11px;
+}
+
+.footer-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.footer-meta strong {
+  color: var(--ink);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+}
+
+.footer-meta span {
+  color: #8c8276;
+  font-size: 11px;
+}
+
+.footer-contacts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.footer-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 12px;
+  border: 1px solid #e7dcce;
+  border-radius: 6px;
+  background: #fffaf3;
+  color: #52616d;
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background 0.26s ease,
+    border-color 0.26s ease,
+    color 0.26s ease,
+    transform 0.26s ease;
+}
+
+.footer-contact-pill svg {
+  font-size: 13px;
+  color: #8c8276;
+  transition: color 0.26s ease;
+}
+
+.footer-contact-pill:hover {
+  background: #fff0df;
+  border-color: #d8c1ad;
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.footer-contact-pill:hover svg {
+  color: var(--orange);
+}
+
+.footer-contact-pill.social-tiktok:hover {
+  border-color: #000;
+  color: #000;
+}
+
+.footer-contact-pill.social-tiktok:hover svg {
+  color: #000;
+}
+
+.footer-contact-pill.social-whatsapp:hover {
+  border-color: #25d366;
+  color: #128c7e;
+}
+
+.footer-contact-pill.social-whatsapp:hover svg {
+  color: #25d366;
+}
+
+.footer-admin-link {
+  background: transparent;
+  border: 0;
+  color: #a89d91;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 7px 8px;
+  border-radius: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.26s ease;
+}
+
+.footer-admin-link:hover {
+  color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .public-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 28px 24px 36px;
+  }
+}
+
+@media (max-width: 600px) {
+  .public-footer {
+    padding: 24px 18px 32px;
+  }
+  .footer-contacts {
+    gap: 8px;
+  }
+  .footer-contact-pill {
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+}

@@ -29,13 +29,32 @@ function MetricCard({
   );
 }
 
-function MetricsGrid() {
+function MetricsGrid({
+  totalRevenue = "GH₵21,500.00",
+  totalStudents = 40,
+  maxCap = 50,
+  foundationsCount = 18,
+  foundationsRevenue = "GH₵7,200.00",
+  fullstackCount = 22,
+  fullstackRevenue = "GH₵14,300.00",
+}) {
+  const capacityPercent = Math.min(
+    100,
+    Math.round((totalStudents / (maxCap || 50)) * 100),
+  );
+  const foundationsPercent = totalStudents
+    ? Math.round((foundationsCount / totalStudents) * 100)
+    : 0;
+  const fullstackPercent = totalStudents
+    ? Math.round((fullstackCount / totalStudents) * 100)
+    : 0;
+
   return (
     <section className="metric-grid" aria-label="Cohort metrics">
       <MetricCard
         className="revenue"
         label="Total Revenue Collected"
-        value="GH₵21,500.00"
+        value={totalRevenue}
         icon={MdAccountBalanceWallet}
       >
         <div className="metric-note">
@@ -47,40 +66,40 @@ function MetricsGrid() {
       </MetricCard>
       <MetricCard
         label="Total Students Enrolled"
-        value="40"
-        detail="/ 50 Max Cap"
+        value={totalStudents}
+        detail={`/ ${maxCap} Max Cap`}
         icon={MdGroup}
       >
         <div className="progress-row">
           <span>Capacity filled</span>
-          <strong>80%</strong>
+          <strong>{capacityPercent}%</strong>
         </div>
         <div className="progress">
-          <span />
+          <span style={{ width: `${capacityPercent}%` }} />
         </div>
       </MetricCard>
       <MetricCard
         className="track-card foundations"
         label="Foundations Track"
-        value="18"
+        value={foundationsCount}
         detail="Students"
         icon={MdLayers}
       >
         <div className="track-meta">
-          <strong>GH₵7,200.00</strong>
-          <span>45% of cohort</span>
+          <strong>{foundationsRevenue}</strong>
+          <span>{foundationsPercent}% of cohort</span>
         </div>
       </MetricCard>
       <MetricCard
         className="track-card fullstack"
         label="Full-Stack Track"
-        value="22"
+        value={fullstackCount}
         detail="Students"
         icon={MdLayers}
       >
         <div className="track-meta">
-          <strong>GH₵14,300.00</strong>
-          <span>55% of cohort</span>
+          <strong>{fullstackRevenue}</strong>
+          <span>{fullstackPercent}% of cohort</span>
         </div>
       </MetricCard>
     </section>

@@ -1,11 +1,27 @@
 import { useState } from "react";
 import { MdArrowForward, MdClose, MdMenu } from "react-icons/md";
-import logo from "../assets/logo.png";
+import logo from "../assets/b-logo.png";
 import "./PublicHeader.css";
 
 function PublicHeader({ onNavigate }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const closeMenu = () => setMenuOpen(false);
+
+  const handleNavClick = (event, hash) => {
+    event.preventDefault();
+    closeMenu();
+    if (window.location.pathname !== "/") {
+      onNavigate("/" + hash);
+    } else {
+      const el = document.querySelector(hash);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.location.hash = hash;
+      }
+    }
+  };
+
   return (
     <header className={`public-header ${menuOpen ? "menu-open" : ""}`}>
       <a
@@ -24,26 +40,17 @@ function PublicHeader({ onNavigate }) {
         </span>
       </a>
       <nav className="public-nav">
-        <a href="#tracks" onClick={closeMenu}>
+        <a href="#tracks" onClick={(e) => handleNavClick(e, "#tracks")}>
           Tracks
         </a>
-        <a href="#pedagogy" onClick={closeMenu}>
+        <a href="#pedagogy" onClick={(e) => handleNavClick(e, "#pedagogy")}>
           Pedagogy
         </a>
-        <a href="#cohorts" onClick={closeMenu}>
+        <a href="#cohorts" onClick={(e) => handleNavClick(e, "#cohorts")}>
           Cohorts
         </a>
       </nav>
       <div className="header-actions">
-        <button
-          className="mobile-menu"
-          type="button"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          aria-expanded={menuOpen}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <MdClose /> : <MdMenu />}
-        </button>
         <button
           className="outline-button"
           type="button"
@@ -53,6 +60,15 @@ function PublicHeader({ onNavigate }) {
           }}
         >
           Enroll Now <MdArrowForward />
+        </button>
+        <button
+          className="mobile-menu"
+          type="button"
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <MdClose /> : <MdMenu />}
         </button>
       </div>
     </header>

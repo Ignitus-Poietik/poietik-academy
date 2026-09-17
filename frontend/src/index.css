@@ -1,17 +1,35 @@
 :root {
-  --ink: #0d1926;
+  --ink: #101c2b;
   --orange: #ff5a19;
   --red: #f0441f;
   --yellow: #ffbf13;
-  --cream: #fff7ef;
-  --paper: #f8fbfc;
-  --muted-light: #a2b0bb;
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  --cream: #fff8ef;
+  --paper: #fffdf9;
+  --muted-light: #687582;
+  --surface: #ffffff;
+  --line: #e7e0d8;
+  --brand-gradient: linear-gradient(
+    135deg,
+    #f0441f 0%,
+    #ff6a00 48%,
+    #ffbf13 100%
+  );
+  --soft-gradient: linear-gradient(
+    135deg,
+    #fff7ed 0%,
+    #fffdf9 55%,
+    #fff1d8 100%
+  );
+  font-family: "Inter", sans-serif;
   color: var(--ink);
-  background: #f7f8f9;
+  background: #fffdf9;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 * {
@@ -23,6 +41,21 @@ body {
 }
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
+}
+button {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+h1,
+h2,
+h3,
+.public-brand strong {
+  font-family: "Montserrat", sans-serif;
 }

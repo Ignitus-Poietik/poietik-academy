@@ -45,14 +45,29 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 11px 14px;
+  padding: 11px 16px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 6px;
   background: var(--orange);
   color: #fff;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 12px;
+  font-weight: 700;
   cursor: pointer;
+  transition: all 0.26s ease;
+}
+.admin-primary:hover,
+.save-button:hover {
+  background: #ea4d10;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(255, 90, 25, 0.25);
+}
+.admin-primary:active,
+.save-button:active {
+  transform: translateY(0) scale(0.98);
+}
+.save-button.is-saved {
+  background: #2e7d32;
+  box-shadow: 0 4px 14px rgba(46, 125, 50, 0.25);
 }
 .admin-primary svg,
 .save-button svg {

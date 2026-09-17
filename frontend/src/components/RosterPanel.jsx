@@ -9,14 +9,41 @@ import {
 import "./RosterPanel.css";
 
 function RosterPanel({
-  students,
-  search,
-  onSearch,
-  track,
-  onTrackChange,
-  payment,
-  onPaymentChange,
+  students = [],
+  search = "",
+  onSearch = () => {},
+  track = "All Tracks",
+  onTrackChange = () => {},
+  payment = "All Payment Status",
+  onPaymentChange = () => {},
+  totalCount = 40,
 }) {
+  const handleExport = () => {
+    if (!students || students.length === 0) return;
+    const headers = ["ID", "Name", "Email", "Phone", "Track", "Amount Paid"];
+    const rows = students.map((s) => [
+      s.id,
+      `"${s.name}"`,
+      s.email,
+      `"${s.phone}"`,
+      `"${s.track}"`,
+      `"${s.amount}"`,
+    ]);
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute(
+      "download",
+      `poietik_roster_${new Date().toISOString().slice(0, 10)}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <section className="roster-panel">
       <div className="panel-toolbar">
@@ -111,8 +138,10 @@ function RosterPanel({
         )}
       </div>
       <div className="panel-footer">
-        <span>Showing {students.length} of 40 enrolled students</span>
-        <button type="button">
+        <span>
+          Showing {students.length} of {totalCount} enrolled students
+        </span>
+        <button type="button" onClick={handleExport}>
           <MdDownload /> Export current view
         </button>
       </div>

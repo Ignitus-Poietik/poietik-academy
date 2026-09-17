@@ -8,6 +8,7 @@ import urllib.request
 import uuid
 from decimal import Decimal, InvalidOperation
 
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import user_passes_test
 from django.conf import settings
 from django.db import transaction
@@ -68,24 +69,180 @@ def initialize_payment(request):
     except Cohort.DoesNotExist:
         return JsonResponse({"error": "This cohort is not accepting registrations."}, status=404)
 
-    student = Student.objects.create(full_name=data["full_name"], email=data["email"], whatsapp_number=data["whatsapp_number"], cohort=cohort, amount_paid=cohort.early_bird_fee)
+    student = Student.objects.create(
+        full_name=data["full_name"],
+        email=data["email"],
+        whatsapp_number=data["whatsapp_number"],
+        cohort=cohort,
+        amount_paid=cohort.early_bird_fee,
+    )
     reference = f"POI-{student.id}-{uuid.uuid4().hex[:10].upper()}"
     student.paystack_reference = reference
     student.save(update_fields=("paystack_reference",))
 
-    secret_key = os.environ.get("PAYSTACK_SECRET_KEY")
+    secret_key = getattr(settings, "PAYSTACK_SECRET_KEY", None) or os.environ.get("PAYSTACK_SECRET_KEY")
     if not secret_key:
-        return JsonResponse({"reference": reference, "authorization_url": None, "message": "PAYSTACK_SECRET_KEY is not configured."}, status=201)
-    payload = json.dumps({"email": student.email, "amount": int(cohort.early_bird_fee * 100), "reference": reference, "callback_url": os.environ.get("PAYSTACK_CALLBACK_URL", "")}).encode()
-    request = urllib.request.Request("https://api.paystack.co/transaction/initialize", data=payload, headers={"Authorization": f"Bearer {secret_key}", "Content-Type": "application/json"})
+        return JsonResponse({
+            "reference": reference,
+            "authorization_url": None,
+            "message": "PAYSTACK_SECRET_KEY is not configured.",
+        }, status=201)
+
+    callback_url = data.get("callback_url") or getattr(settings, "PAYSTACK_CALLBACK_URL", "") or os.environ.get("PAYSTACK_CALLBACK_URL", "")
+    if not callback_url:
+        callback_url = request.build_absolute_uri("/enrollment/success")
+
+    payload = json.dumps({
+        "email": student.email,
+        "amount": int(cohort.early_bird_fee * 100),
+        "currency": "GHS",
+        "reference": reference,
+        "callback_url": callback_url,
+        "metadata": {
+            "student_id": student.id,
+            "cohort_title": cohort.title,
+            "track": cohort.track,
+            "whatsapp_number": student.whatsapp_number,
+        },
+    }).encode()
+    req = urllib.request.Request(
+        "https://api.paystack.co/transaction/initialize",
+        data=payload,
+        headers={
+            "Authorization": f"Bearer {secret_key}",
+            "Content-Type": "application/json",
+            "User-Agent": "Mozilla/5.0 (compatible; PoietikAcademy/1.0)",
+        },
+    )
     try:
-        with urllib.request.urlopen(request, timeout=15) as response:
+        with urllib.request.urlopen(req, timeout=15) as response:
             paystack_data = json.loads(response.read().decode())
     except (urllib.error.URLError, json.JSONDecodeError) as error:
         return JsonResponse({"error": f"Unable to initialize Paystack checkout: {error}"}, status=502)
     if not paystack_data.get("status"):
         return JsonResponse({"error": paystack_data.get("message", "Paystack rejected the request.")}, status=502)
-    return JsonResponse({"reference": reference, "authorization_url": paystack_data["data"]["authorization_url"]}, status=201)
+
+    return JsonResponse({
+        "reference": reference,
+        "authorization_url": paystack_data["data"]["authorization_url"],
+        "access_code": paystack_data["data"].get("access_code"),
+        "public_key": getattr(settings, "PAYSTACK_PUBLIC_KEY", ""),
+    }, status=201)
+
+
+@require_GET
+def verify_payment(request):
+    reference = request.GET.get("reference", "").strip()
+    if not reference:
+        return JsonResponse({"error": "Reference parameter is required."}, status=400)
+
+    secret_key = getattr(settings, "PAYSTACK_SECRET_KEY", None) or os.environ.get("PAYSTACK_SECRET_KEY", "")
+    student = Student.objects.filter(paystack_reference=reference).select_related("cohort").first()
+
+    req = urllib.request.Request(
+        f"https://api.paystack.co/transaction/verify/{reference}",
+        headers={
+            "Authorization": f"Bearer {secret_key}",
+            "User-Agent": "Mozilla/5.0 (compatible; PoietikAcademy/1.0)",
+        },
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            data = json.loads(resp.read().decode())
+    except (urllib.error.URLError, json.JSONDecodeError) as e:
+        if student and student.payment_status == "paid":
+            return JsonResponse({
+                "status": "success",
+                "verified": True,
+                "reference": reference,
+                "whatsapp_url": student.cohort.whatsapp_url or "https://chat.whatsapp.com/EQCSUbUfF555mJtbhk5uoT",
+                "student": {
+                    "name": student.full_name,
+                    "email": student.email,
+                    "track": student.cohort.track,
+                    "amount_paid": str(student.amount_paid),
+                },
+            })
+        return JsonResponse({"error": f"Paystack verification request failed: {e}"}, status=502)
+
+    if not data.get("status"):
+        return JsonResponse({"error": data.get("message", "Unable to verify transaction.")}, status=400)
+
+    txn_data = data.get("data", {})
+    txn_status = txn_data.get("status")
+
+    if txn_status == "success":
+        if student:
+            student.payment_status = "paid"
+            student.amount_paid = Decimal(txn_data.get("amount", 0)) / Decimal("100")
+            student.save(update_fields=("payment_status", "amount_paid"))
+        whatsapp_link = (student.cohort.whatsapp_url if student and student.cohort else "") or "https://chat.whatsapp.com/EQCSUbUfF555mJtbhk5uoT"
+        return JsonResponse({
+            "status": "success",
+            "verified": True,
+            "reference": reference,
+            "whatsapp_url": whatsapp_link,
+            "student": {
+                "name": student.full_name if student else txn_data.get("customer", {}).get("email"),
+                "email": student.email if student else txn_data.get("customer", {}).get("email"),
+                "track": student.cohort.track if student and student.cohort else "Cohort 001",
+                "amount_paid": str(Decimal(txn_data.get("amount", 0)) / Decimal("100")),
+            },
+        })
+    else:
+        return JsonResponse({
+            "status": txn_status,
+            "verified": False,
+            "reference": reference,
+            "message": txn_data.get("gateway_response", f"Payment is {txn_status}."),
+            "whatsapp_url": "https://chat.whatsapp.com/EQCSUbUfF555mJtbhk5uoT",
+        })
+
+
+@require_POST
+def admin_login(request):
+    data = _json_body(request)
+    if not data:
+        return JsonResponse({"error": "Invalid request body."}, status=400)
+    username = data.get("username", "").strip()
+    password = data.get("password", "")
+    if not username or not password:
+        return JsonResponse({"error": "Username and password are required."}, status=400)
+
+    user = authenticate(request, username=username, password=password)
+    if user is not None and user.is_staff:
+        login(request, user)
+        return JsonResponse({
+            "status": "ok",
+            "user": {
+                "username": user.username,
+                "email": user.email,
+                "is_staff": user.is_staff,
+                "is_superuser": user.is_superuser,
+            },
+        })
+    return JsonResponse({"error": "Invalid username or password, or unauthorized access."}, status=401)
+
+
+@require_GET
+def admin_me(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return JsonResponse({
+            "authenticated": True,
+            "user": {
+                "username": request.user.username,
+                "email": request.user.email,
+                "is_staff": request.user.is_staff,
+                "is_superuser": request.user.is_superuser,
+            },
+        })
+    return JsonResponse({"authenticated": False, "user": None})
+
+
+@require_POST
+def admin_logout(request):
+    logout(request)
+    return JsonResponse({"status": "ok"})
 
 
 def _is_staff(request):

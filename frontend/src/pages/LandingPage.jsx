@@ -8,16 +8,21 @@ import {
 } from "react-icons/md";
 import { motion } from "framer-motion";
 import PublicHeader from "../components/PublicHeader";
+import PublicFooter from "../components/PublicFooter";
 import "./LandingPage.css";
 
 function LandingPage({ onNavigate }) {
   const reveal = {
-    hidden: { opacity: 0, y: 24 },
-    visible: { opacity: 1, y: 0 },
+    hidden: { opacity: 0, y: 22 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.75, ease: [0.25, 0.46, 0.45, 0.94] },
+    },
   };
   const stagger = {
     hidden: {},
-    visible: { transition: { staggerChildren: 0.18, delayChildren: 0.12 } },
+    visible: { transition: { staggerChildren: 0.14, delayChildren: 0.08 } },
   };
   return (
     <div className="public-page">
@@ -54,16 +59,28 @@ function LandingPage({ onNavigate }) {
           </motion.div>
           <motion.div
             className="hero-visual"
-            initial={{ opacity: 0, scale: 0.92 }}
+            initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.15, delay: 0.45, ease: "easeOut" }}
+            transition={{
+              duration: 0.85,
+              delay: 0.25,
+              ease: [0.25, 0.46, 0.45, 0.94],
+            }}
           >
-            <div className="orbit orbit-one" />
-            <div className="orbit orbit-two" />
+            <motion.div
+              className="orbit orbit-one"
+              animate={{ rotate: [-22, -18, -22] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="orbit orbit-two"
+              animate={{ rotate: [38, 42, 38] }}
+              transition={{ duration: 11, repeat: Infinity, ease: "easeInOut" }}
+            />
             <motion.div
               className="code-window"
-              animate={{ y: [0, -8, 0], rotate: [-4, -3, -4] }}
-              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              animate={{ y: [0, -6, 0], rotate: [-4, -3, -4] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
             >
               <div className="window-bar">
                 <span />
@@ -87,9 +104,13 @@ function LandingPage({ onNavigate }) {
             </motion.div>
             <motion.div
               className="hero-tile"
-              initial={{ opacity: 0, x: 22 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.5, duration: 0.8, ease: "easeOut" }}
+              initial={{ opacity: 0, x: 18, rotate: 5 }}
+              animate={{ opacity: 1, x: 0, rotate: 5 }}
+              transition={{
+                delay: 0.5,
+                duration: 0.65,
+                ease: [0.25, 0.46, 0.45, 0.94],
+              }}
             >
               <MdTerminal />
               <span>
@@ -128,10 +149,9 @@ function LandingPage({ onNavigate }) {
             <motion.article
               className="track-card orange-track"
               variants={reveal}
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.2 }}
+              whileHover={{ y: -6 }}
+              transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="track-number">01 / FOUNDATION</div>
               <MdCode />
               <h3>
                 Web Development
@@ -144,7 +164,7 @@ function LandingPage({ onNavigate }) {
               </p>
               <div className="track-tags">
                 <span>6 WEEKS</span>
-                <span>GH₵400 EARLY-BIRD</span>
+                <span>PROJECT-BASED</span>
               </div>
               <ul>
                 <li>
@@ -167,10 +187,9 @@ function LandingPage({ onNavigate }) {
             <motion.article
               className="track-card dark-track"
               variants={reveal}
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.2 }}
+              whileHover={{ y: -6 }}
+              transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
-              <div className="track-number">02 / ADVANCED</div>
               <MdTerminal />
               <h3>
                 Full-Stack
@@ -183,7 +202,7 @@ function LandingPage({ onNavigate }) {
               </p>
               <div className="track-tags">
                 <span>8 WEEKS</span>
-                <span>GH₵650 EARLY-BIRD</span>
+                <span>PRODUCTION WORKFLOW</span>
               </div>
               <ul>
                 <li>
@@ -229,7 +248,8 @@ function LandingPage({ onNavigate }) {
           >
             <motion.article
               variants={reveal}
-              whileHover={{ y: -5, borderColor: "#ff5a19" }}
+              whileHover={{ y: -4, borderColor: "#ff5a19" }}
+              transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               <MdGroups />
               <span>01</span>
@@ -240,7 +260,8 @@ function LandingPage({ onNavigate }) {
             </motion.article>
             <motion.article
               variants={reveal}
-              whileHover={{ y: -5, borderColor: "#ff5a19" }}
+              whileHover={{ y: -4, borderColor: "#ff5a19" }}
+              transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               <MdCloudUpload />
               <span>02</span>
@@ -252,7 +273,8 @@ function LandingPage({ onNavigate }) {
             </motion.article>
             <motion.article
               variants={reveal}
-              whileHover={{ y: -5, borderColor: "#ff5a19" }}
+              whileHover={{ y: -4, borderColor: "#ff5a19" }}
+              transition={{ duration: 0.32, ease: [0.25, 0.46, 0.45, 0.94] }}
             >
               <MdTerminal />
               <span>03</span>
@@ -280,15 +302,7 @@ function LandingPage({ onNavigate }) {
           </button>
         </section>
       </main>
-      <footer className="public-footer">
-        <span>© 2026 Ignitus Poietik</span>
-        <span>Engineering education for the builders ahead.</span>
-        <div>
-          <a href="mailto:hello@poietik.academy">Contact</a>
-          <a href="#">WhatsApp</a>
-          <a href="#">Terms</a>
-        </div>
-      </footer>
+      <PublicFooter onNavigate={onNavigate} />
     </div>
   );
 }

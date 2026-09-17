@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-development-onl
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [host for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host]
+ALLOWED_HOSTS = [host for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') if host]
 
 
 # Application definition
@@ -118,8 +118,16 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
-PAYSTACK_CALLBACK_URL = os.environ.get('PAYSTACK_CALLBACK_URL', '')
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', 'sk_test_f0a8b2ee5dc0776e8629b4bb5a81b5cab6173ca5')
+PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', 'pk_test_f6de2516f0f131877c2e4f6e4c0fce3f9d85d5ff')
+PAYSTACK_CALLBACK_URL = os.environ.get('PAYSTACK_CALLBACK_URL', 'http://localhost:5173/enrollment/success')
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+    'http://localhost:3000',
+    'http://127.0.0.1:8000',
+]
 
 
 # Email

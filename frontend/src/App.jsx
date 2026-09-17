@@ -5,6 +5,7 @@ import EnrollPage from "./pages/EnrollPage";
 import SuccessPage from "./pages/SuccessPage";
 import AdminCohorts from "./pages/AdminCohorts";
 import AdminStudents from "./pages/AdminStudents";
+import AdminLogin from "./pages/AdminLogin";
 import "./App.css";
 
 function App() {
@@ -23,18 +24,25 @@ function App() {
   if (path === "/enroll") screen = <EnrollPage onNavigate={navigate} />;
   if (path === "/enrollment/success")
     screen = <SuccessPage onNavigate={navigate} />;
-  if (path === "/admin/cohorts") screen = <AdminCohorts />;
-  if (path === "/admin/students") screen = <AdminStudents />;
+  if (path === "/admin/login") screen = <AdminLogin onNavigate={navigate} />;
+  if (path === "/admin" || path === "/admin/")
+    screen = (
+      <AdminStudents onNavigate={navigate} currentPath="/admin/students" />
+    );
+  if (path === "/admin/cohorts")
+    screen = <AdminCohorts onNavigate={navigate} currentPath={path} />;
+  if (path === "/admin/students")
+    screen = <AdminStudents onNavigate={navigate} currentPath={path} />;
   return (
     <MotionConfig reducedMotion="user">
       <AnimatePresence mode="wait">
         <motion.div
           key={path}
           className="route-screen"
-          initial={{ opacity: 0, y: 12 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.55, ease: "easeInOut" }}
+          exit={{ opacity: 0, y: -10 }}
+          transition={{ duration: 0.48, ease: [0.25, 0.46, 0.45, 0.94] }}
         >
           {screen}
         </motion.div>
