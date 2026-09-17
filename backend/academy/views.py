@@ -14,6 +14,7 @@ from django.conf import settings
 from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
+from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.views.decorators.http import require_GET, require_POST
@@ -64,7 +65,13 @@ def _cohort_payload(cohort, include_private=False):
 @ensure_csrf_cookie
 @require_GET
 def csrf_token(request):
-    return JsonResponse({"ready": True})
+    token = get_token(request)
+    return JsonResponse({"ready": True, "csrfToken": token})
+
+
+@require_GET
+def health(request):
+    return JsonResponse({"status": "ok"})
 
 
 @require_GET

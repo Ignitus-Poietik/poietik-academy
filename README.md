@@ -196,6 +196,65 @@ For local testing, use Paystack test credentials and a publicly reachable webhoo
 
 SQLite is used locally for convenience. For deployment, configure Django to use PostgreSQL or Supabase through environment variables and a production database adapter.
 
+### Deploy the backend to Render with Neon
+
+The repository includes [`render.yaml`](render.yaml). In Render, create a Blueprint from the repository, or create a Python web service with these equivalent settings:
+
+```text
+Root directory: backend
+Build command: pip install -r requirements.txt && python manage.py collectstatic --no-input
+Pre-deploy command: python manage.py migrate
+Start command: gunicorn backend.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+Health check path: /api/health/
+```
+
+Create a Neon database and copy its pooled connection string into Render as `DATABASE_URL`. The Django configuration automatically uses PostgreSQL when `DATABASE_URL` is present and keeps SQLite for local development.
+
+Set these Render environment variables:
+
+```env
+DEBUG=False
+SECRET_KEY=<generate-a-long-random-secret>
+DATABASE_URL=<neon-pooled-postgresql-url>
+ALLOWED_HOSTS=poietik-academy-api.onrender.com
+FRONTEND_URL=https://<your-vercel-project>.vercel.app
+PAYSTACK_SECRET_KEY=sk_live_...
+PAYSTACK_PUBLIC_KEY=pk_live_...
+PAYSTACK_CALLBACK_URL=https://<your-vercel-project>.vercel.app/enrollment/success
+```
+
+Add your custom Vercel domain to `ALLOWED_HOSTS` only if Django itself receives requests for that host. `FRONTEND_URL` is the important value for browser CORS, CSRF, and admin session cookies.
+
+After the first deploy, create the admin account from Render's shell:
+
+```bash
+python manage.py createsuperuser
+```
+
+### Deploy the frontend to Vercel
+
+Import the `frontend` directory as the Vercel project. Vercel detects Vite automatically.
+
+Set this Vercel environment variable for Production, Preview, and Development as needed:
+
+```env
+VITE_API_BASE_URL=https://poietik-academy-api.onrender.com/api
+```
+
+The frontend includes [`frontend/vercel.json`](frontend/vercel.json) so direct visits to client-side routes such as `/enroll` and `/admin/login` resolve to the React application instead of returning a 404.
+
+For local development, leave `VITE_API_BASE_URL=/api`; Vite proxies those requests to Django on `127.0.0.1:8000`.
+
+### Paystack production settings
+
+Set the Paystack webhook URL to:
+
+```text
+https://poietik-academy-api.onrender.com/api/payments/paystack/webhook/
+```
+
+Use live keys only in Render environment variables. Never commit Paystack keys or put the secret key in Vercel.
+
 Before deployment:
 
 - Set `DEBUG=False`

@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -24,9 +26,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-local-development-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = [host for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') if host]
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',') if host.strip()]
+render_external = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if render_external and render_external not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(render_external)
+if '.onrender.com' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('.onrender.com')
 
 
 # Application definition
@@ -38,12 +45,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'academy',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -73,13 +83,26 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+# Optimized for Neon DB (handles both direct connection and connection pooler)
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+if DATABASE_URL:
+    is_pooler = '-pooler' in DATABASE_URL
+    parsed_db = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=0 if is_pooler else 600,
+        ssl_require=True,
+    )
+    if is_pooler:
+        parsed_db['DISABLE_SERVER_SIDE_CURSORS'] = True
+    DATABASES = {'default': parsed_db}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 
 # Password validation
@@ -117,17 +140,51 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+}
 
-PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', 'sk_test_f0a8b2ee5dc0776e8629b4bb5a81b5cab6173ca5')
-PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', 'pk_test_f6de2516f0f131877c2e4f6e4c0fce3f9d85d5ff')
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '')
+PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', '')
 PAYSTACK_CALLBACK_URL = os.environ.get('PAYSTACK_CALLBACK_URL', 'http://localhost:5173/enrollment/success')
 
-CSRF_TRUSTED_ORIGINS = [
+# CORS & CSRF Configuration (supports Vercel frontend, custom domains, and local dev)
+raw_frontend_url = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+FRONTEND_URLS = [url.strip().rstrip('/') for url in raw_frontend_url.split(',') if url.strip()]
+FRONTEND_URL = FRONTEND_URLS[0] if FRONTEND_URLS else 'http://localhost:5173'
+
+extra_cors = [url.strip().rstrip('/') for url in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if url.strip()]
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(FRONTEND_URLS + extra_cors + [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:3000',
     'http://127.0.0.1:8000',
+]))
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
 ]
+CORS_ALLOW_CREDENTIALS = True
+
+extra_csrf = [url.strip().rstrip('/') for url in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if url.strip()]
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(
+    FRONTEND_URLS + extra_csrf + [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:3000',
+        'http://127.0.0.1:8000',
+        'https://*.vercel.app',
+        'https://*.onrender.com',
+    ]
+))
+
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = 'None'
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'None'
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 # Email
