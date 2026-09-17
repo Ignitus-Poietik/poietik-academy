@@ -5,7 +5,11 @@ import EnrollPage from "./pages/EnrollPage";
 import SuccessPage from "./pages/SuccessPage";
 import AdminCohorts from "./pages/AdminCohorts";
 import AdminStudents from "./pages/AdminStudents";
+import AdminOverview from "./pages/AdminOverview";
 import AdminLogin from "./pages/AdminLogin";
+import AdminGuard from "./components/AdminGuard";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
 function App() {
@@ -25,16 +29,38 @@ function App() {
   if (path === "/enrollment/success")
     screen = <SuccessPage onNavigate={navigate} />;
   if (path === "/admin/login") screen = <AdminLogin onNavigate={navigate} />;
-  if (path === "/admin" || path === "/admin/")
+  if (path === "/admin" || path === "/admin/" || path === "/admin/overview")
     screen = (
-      <AdminStudents onNavigate={navigate} currentPath="/admin/students" />
+      <AdminGuard onNavigate={navigate}>
+        <AdminOverview onNavigate={navigate} currentPath="/admin/overview" />
+      </AdminGuard>
     );
   if (path === "/admin/cohorts")
-    screen = <AdminCohorts onNavigate={navigate} currentPath={path} />;
+    screen = (
+      <AdminGuard onNavigate={navigate}>
+        <AdminCohorts onNavigate={navigate} currentPath={path} />
+      </AdminGuard>
+    );
   if (path === "/admin/students")
-    screen = <AdminStudents onNavigate={navigate} currentPath={path} />;
+    screen = (
+      <AdminGuard onNavigate={navigate}>
+        <AdminStudents onNavigate={navigate} currentPath={path} />
+      </AdminGuard>
+    );
   return (
     <MotionConfig reducedMotion="user">
+      <ToastContainer
+        position="top-right"
+        autoClose={3500}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <AnimatePresence mode="wait">
         <motion.div
           key={path}

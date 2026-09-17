@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { MdArrowBack, MdErrorOutline, MdLock, MdLogin } from "react-icons/md";
 import { adminLogin } from "../lib/api";
+import { toast } from "react-toastify";
 import PublicHeader from "../components/PublicHeader";
 import PublicFooter from "../components/PublicFooter";
 import "./AdminLogin.css";
@@ -16,21 +17,16 @@ function AdminLogin({ onNavigate }) {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
   };
 
-  const fillDefaultCredentials = () => {
-    setCredentials({
-      username: "admin",
-      password: "PoietikAdmin2026!",
-    });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setStatus({ loading: true, error: "" });
     try {
       await adminLogin(credentials);
       sessionStorage.setItem("poietik_admin_user", credentials.username);
-      onNavigate("/admin/students");
+      toast.success("Authentication successful! Welcome to the Admin Console.");
+      onNavigate("/admin/overview");
     } catch (err) {
+      toast.error(err.message || "Invalid credentials. Please try again.");
       setStatus({
         loading: false,
         error: err.message || "Invalid credentials. Please try again.",
@@ -66,27 +62,6 @@ function AdminLogin({ onNavigate }) {
             </p>
           </div>
 
-          <div className="credentials-helper-card">
-            <div className="helper-header">
-              <strong>Your Admin Credentials</strong>
-              <button
-                type="button"
-                className="fill-btn"
-                onClick={fillDefaultCredentials}
-              >
-                Auto-fill
-              </button>
-            </div>
-            <div className="helper-details">
-              <div>
-                <span>Username:</span> <code>admin</code>
-              </div>
-              <div>
-                <span>Password:</span> <code>PoietikAdmin2026!</code>
-              </div>
-            </div>
-          </div>
-
           <form className="login-form" onSubmit={handleSubmit}>
             <div className="field">
               <label htmlFor="username">Username</label>
@@ -96,7 +71,7 @@ function AdminLogin({ onNavigate }) {
                 type="text"
                 value={credentials.username}
                 onChange={handleChange}
-                placeholder="e.g. admin"
+                placeholder="Enter username"
                 autoComplete="username"
                 required
               />
@@ -134,17 +109,6 @@ function AdminLogin({ onNavigate }) {
                 : "Sign in to Admin Console"}
             </button>
           </form>
-
-          <div className="login-footer-links">
-            <span>Prefer Django native admin?</span>
-            <a
-              href="http://127.0.0.1:8000/admin/"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open Django Admin Portal (/admin/)
-            </a>
-          </div>
         </div>
       </main>
       <PublicFooter onNavigate={onNavigate} />

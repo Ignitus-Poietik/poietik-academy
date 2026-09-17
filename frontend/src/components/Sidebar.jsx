@@ -1,14 +1,25 @@
-import { MdClose, MdDashboard, MdPeople, MdSchool } from "react-icons/md";
+import {
+  MdClose,
+  MdDashboard,
+  MdLogout,
+  MdPeople,
+  MdSchool,
+} from "react-icons/md";
 import logo from "../assets/b-logo.png";
+import { adminLogout } from "../lib/api";
+import { toast } from "react-toastify";
 import "./Sidebar.css";
 
 const navigation = [
-  { label: "Admin Overview", icon: MdDashboard, path: "/admin/students" },
+  { label: "Admin Overview", icon: MdDashboard, path: "/admin/overview" },
   { label: "Manage Cohorts", icon: MdSchool, path: "/admin/cohorts" },
   { label: "Student Directory", icon: MdPeople, path: "/admin/students" },
 ];
 
 function Sidebar({ open, onClose, onNavigate, currentPath = "" }) {
+  const username =
+    sessionStorage.getItem("poietik_admin_user") || "saint-poietik";
+
   const handleNav = (event, dest) => {
     event.preventDefault();
     if (onClose) onClose();
@@ -18,6 +29,18 @@ function Sidebar({ open, onClose, onNavigate, currentPath = "" }) {
       window.history.pushState({}, "", dest);
       window.dispatchEvent(new PopStateEvent("popstate"));
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await adminLogout();
+    } catch {
+      // ignore network errors on logout
+    }
+    sessionStorage.removeItem("poietik_admin_user");
+    toast.info("Logged out of Admin Console.");
+    if (onNavigate) onNavigate("/admin/login");
+    else window.location.href = "/admin/login";
   };
 
   return (
@@ -39,17 +62,13 @@ function Sidebar({ open, onClose, onNavigate, currentPath = "" }) {
             <MdClose />
           </button>
         </div>
-        <div className="node-card">
-          <span>Node Environment</span>
-          <strong>Accra Main Hub</strong>
-        </div>
+
         <nav aria-label="Main navigation">
           {navigation.map(({ label, icon: Icon, path }) => {
             const isActive =
               currentPath === path ||
-              (path === "/admin/students" &&
-                label === "Admin Overview" &&
-                currentPath === "/admin/students");
+              (path === "/admin/overview" &&
+                (currentPath === "/admin" || currentPath === "/admin/"));
             return (
               <a
                 className={isActive ? "active" : ""}
@@ -63,14 +82,30 @@ function Sidebar({ open, onClose, onNavigate, currentPath = "" }) {
             );
           })}
         </nav>
+
         <div className="sidebar-footer">
-          <div>
+          <div className="sidebar-user-block">
+            <div className="sidebar-avatar">SP</div>
+            <div className="sidebar-user-info">
+              <strong title={username}>{username}</strong>
+              <span>Superuser</span>
+            </div>
+            <button
+              type="button"
+              className="sidebar-logout-btn"
+              onClick={handleLogout}
+              title="Log out of Admin Console"
+            >
+              <MdLogout />
+            </button>
+          </div>
+
+          <div className="sidebar-campus-row">
             <span>Public Campus</span>
             <a href="/" onClick={(e) => handleNav(e, "/")}>
               View Site
             </a>
           </div>
-          <small>v2.4.0-gh-ignitus</small>
         </div>
       </aside>
     </>

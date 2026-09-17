@@ -45,6 +45,10 @@
   position: relative;
   min-width: 155px;
 }
+.page-size-select {
+  min-width: 120px;
+  margin-left: auto;
+}
 .select-wrap select {
   appearance: none;
   width: 100%;
@@ -61,23 +65,6 @@
   position: absolute;
   right: 8px;
   pointer-events: none;
-}
-.cohort-date {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-left: auto;
-  color: #788a94;
-  font-size: 10px;
-  white-space: nowrap;
-}
-.cohort-date svg {
-  color: var(--orange);
-  font-size: 17px;
-}
-.cohort-date strong {
-  color: #536a78;
-  font-size: 10px;
 }
 .table-wrap {
   overflow-x: auto;
@@ -157,46 +144,149 @@ tbody tr:hover {
   color: #a94b2a;
 }
 .status {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-top: 4px;
-  color: #ca5b2d;
-  font-size: 9px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
 }
-.status svg {
-  color: var(--orange);
-  font-size: 15px;
+.status-verified {
+  background: #dcfce7;
+  color: #15803d;
+}
+.status-verified svg {
+  color: #16a34a;
+  font-size: 14px;
+}
+.status-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+.status-pending svg {
+  color: #d97706;
+  font-size: 14px;
 }
 .panel-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 14px 18px;
-  color: #84919a;
-  font-size: 10px;
+  background: #fcfdfe;
+  border-top: 1px solid #edf0f2;
+  color: #64748b;
+  font-size: 11px;
 }
-.panel-footer button {
+.footer-summary strong {
+  color: var(--ink);
+}
+.pagination-bar {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 16px;
+}
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.page-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 8px;
+  border: 1px solid #dce3e7;
+  border-radius: 4px;
+  background: #fff;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.page-nav-btn:hover:not(:disabled) {
+  background: #fff5eb;
+  border-color: #ffd4be;
+  color: var(--orange);
+}
+.page-nav-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.page-num-btn {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  background: #fff;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+.page-num-btn:hover {
+  border-color: #ffd4be;
+  color: var(--orange);
+}
+.page-num-btn.is-active {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  font-weight: 700;
+}
+.roster-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
   border: 0;
-  background: transparent;
-  color: #bd532c;
-  font: inherit;
+  border-radius: 5px;
+  background: var(--orange);
+  color: #fff;
+  font-size: 11px;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(255, 90, 25, 0.2);
+}
+.roster-export-btn:hover {
+  background: #ea4d10;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(255, 90, 25, 0.3);
+}
+.roster-export-btn:active {
+  transform: translateY(0);
+}
+.roster-export-btn svg {
+  font-size: 15px;
+}
+.delete-student-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid #ffd4be;
+  border-radius: 4px;
+  background: #fff8f3;
+  color: var(--orange);
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.delete-student-btn:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+  transform: translateY(-1px);
 }
 .empty-state {
-  padding: 36px;
+  padding: 42px 20px;
   text-align: center;
-  color: #84919a;
-  font-size: 12px;
-}
-@media (max-width: 1080px) {
-  .cohort-date {
-    display: none;
-  }
+  color: #94a3b8;
+  font-size: 13px;
 }
 @media (max-width: 760px) {
   .panel-toolbar {
@@ -210,9 +300,17 @@ tbody tr:hover {
     flex: 1;
     min-width: 0;
   }
+  .page-size-select {
+    margin-left: 0;
+  }
   .panel-footer {
     align-items: start;
-    gap: 12px;
+    gap: 14px;
     flex-direction: column;
+  }
+  .pagination-bar {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
   }
 }

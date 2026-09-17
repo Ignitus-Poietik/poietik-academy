@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { MdArrowBack, MdErrorOutline, MdLock } from "react-icons/md";
 import PublicHeader from "../components/PublicHeader";
 import PublicFooter from "../components/PublicFooter";
+import { toast } from "react-toastify";
 import { getPublicCohorts, initializePayment } from "../lib/api";
 import "./PublicFlow.css";
 
@@ -54,9 +55,53 @@ function EnrollPage({ onNavigate }) {
   }, [cohorts, selectedSlug]);
   const updateField = (event) =>
     setForm({ ...form, [event.target.name]: event.target.value });
+
+  const validateStudentForm = () => {
+    const name = form.full_name.trim();
+    if (!name || name.length < 2) {
+      toast.error("Please enter your full legal name (at least 2 characters).");
+      return false;
+    }
+    const email = form.email.trim();
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailPattern.test(email)) {
+      toast.error("Please provide a valid email address.");
+      return false;
+    }
+    const phone = form.whatsapp_number.trim();
+    const phonePattern = /^(\+?233|0)[0-9\s-]{8,14}$/;
+    if (!phone || !phonePattern.test(phone)) {
+      toast.error(
+        "Please enter a valid phone number (e.g., +233 24 123 4567 or 024 123 4567).",
+      );
+      return false;
+    }
+    return true;
+  };
+
   const submitEnrollment = async (event) => {
     event.preventDefault();
+
+    if (!validateStudentForm()) {
+      return;
+    }
+
+    const currentCohort = cohorts.find((c) => c.slug === selectedSlug);
+    if (currentCohort?.is_full) {
+      toast.error(
+        `Admissions for "${currentCohort.title}" are currently full. Please select another track or contact administration.`,
+      );
+      setCheckoutState({
+        loading: false,
+        error: `Cohort capacity cap reached (${currentCohort.max_capacity} seats filled). Admissions are currently closed.`,
+      });
+      return;
+    }
+
     setCheckoutState({ loading: true, error: "" });
+    toast.info("Connecting to Paystack secure checkout...", {
+      autoClose: 2000,
+    });
     try {
       const callbackUrl = `${window.location.origin}/enrollment/success`;
       const result = await initializePayment({
@@ -68,11 +113,15 @@ function EnrollPage({ onNavigate }) {
         sessionStorage.setItem("poietik_payment_ref", result.reference);
       }
       if (result.authorization_url) {
+        toast.success("Redirecting to Paystack checkout...");
         window.location.assign(result.authorization_url);
       } else {
         onNavigate(`/enrollment/success?reference=${result.reference || ""}`);
       }
     } catch (error) {
+      toast.error(
+        error.message || "Failed to start checkout. Please try again.",
+      );
       setCheckoutState({ loading: false, error: error.message });
     }
   };
@@ -182,6 +231,18 @@ function EnrollPage({ onNavigate }) {
                             {cohort.track.toLowerCase().includes("foundation")
                               ? "6-Week Intensive"
                               : "8-Week Intensive"}
+                            {" · "}
+                            {cohort.is_full ? (
+                              <span
+                                style={{ color: "#dc2626", fontWeight: "700" }}
+                              >
+                                Full
+                              </span>
+                            ) : (
+                              <span style={{ color: "#16a34a" }}>
+                                {cohort.remaining_seats ?? 50} seats left
+                              </span>
+                            )}
                           </span>
                         </div>
                         <span className="radio-fee">
@@ -197,15 +258,48 @@ function EnrollPage({ onNavigate }) {
                   )}
                 </div>
               </div>
+
+              {details?.is_full && (
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    background: "#fef2f2",
+                    border: "1px solid #fecaca",
+                    borderRadius: "8px",
+                    color: "#b91c1c",
+                    fontSize: "13px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "14px",
+                  }}
+                  role="alert"
+                >
+                  <MdErrorOutline style={{ fontSize: "20px", flexShrink: 0 }} />
+                  <span>
+                    Admissions for <strong>{details.title}</strong> have reached
+                    full capacity ({details.max_capacity} seats filled).
+                    Admissions for this intake are closed.
+                  </span>
+                </div>
+              )}
+
               <button
                 className="solid-button pay-button"
                 type="submit"
-                disabled={checkoutState.loading || !details}
+                disabled={checkoutState.loading || !details || details?.is_full}
+                style={
+                  details?.is_full
+                    ? { background: "#94a3b8", cursor: "not-allowed" }
+                    : undefined
+                }
               >
                 <MdLock />{" "}
                 {checkoutState.loading
                   ? "Starting secure checkout..."
-                  : "Pay via Paystack"}
+                  : details?.is_full
+                    ? "Cohort Full — Admissions Closed"
+                    : "Pay via Paystack"}
               </button>
               {checkoutState.error && (
                 <div className="form-error" role="alert">
@@ -249,7 +343,12 @@ function EnrollPage({ onNavigate }) {
                 {formatDate(details?.registration_start)}
               </li>
               <li>
-                <span>Seats remaining</span>12
+                <span>Seats remaining</span>
+                {details?.is_full
+                  ? "Full (0 left)"
+                  : details?.remaining_seats != null
+                    ? `${details.remaining_seats} of ${details.max_capacity || 50}`
+                    : "Limited"}
               </li>
             </ul>
           </aside>

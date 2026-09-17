@@ -39,9 +39,6 @@
   color: #c5bfc1;
   font-size: 22px;
 }
-.revenue {
-  border-top: 3px solid var(--orange);
-}
 .metric-note {
   display: flex;
   align-items: center;
@@ -98,12 +95,6 @@
 .track-meta span {
   color: #87949d;
   font-size: 10px;
-}
-.foundations {
-  border-left: 3px solid var(--yellow);
-}
-.fullstack {
-  border-left: 3px solid var(--red);
 }
 @media (max-width: 1080px) {
   .metric-grid {

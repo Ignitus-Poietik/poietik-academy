@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   MdArrowForward,
   MdCheck,
@@ -9,9 +10,29 @@ import {
 import { motion } from "framer-motion";
 import PublicHeader from "../components/PublicHeader";
 import PublicFooter from "../components/PublicFooter";
+import { getPublicCohorts } from "../lib/api";
 import "./LandingPage.css";
 
 function LandingPage({ onNavigate }) {
+  const [activeCohort, setActiveCohort] = useState(null);
+
+  useEffect(() => {
+    let ignore = false;
+    getPublicCohorts()
+      .then((cohorts) => {
+        if (!ignore && cohorts && cohorts.length > 0) {
+          setActiveCohort(cohorts[0]);
+        }
+      })
+      .catch(() => {
+        // Keep fallback
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
   const reveal = {
     hidden: { opacity: 0, y: 22 },
     visible: {
@@ -287,7 +308,11 @@ function LandingPage({ onNavigate }) {
           </motion.div>
         </section>
         <section className="landing-cta" id="cohorts">
-          <p className="section-kicker">COHORT 001 / ACCRA</p>
+          <p className="section-kicker">
+            {activeCohort
+              ? `${activeCohort.title.toUpperCase()}`
+              : "COHORT 001"}
+          </p>
           <h2>
             Your next chapter
             <br />

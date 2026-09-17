@@ -15,6 +15,7 @@ class Cohort(models.Model):
     slug = models.SlugField(max_length=180, unique=True, blank=True)
     base_fee = models.DecimalField(max_digits=10, decimal_places=2)
     early_bird_fee = models.DecimalField(max_digits=10, decimal_places=2)
+    max_capacity = models.PositiveIntegerField(default=50)
     registration_start = models.DateTimeField()
     registration_end = models.DateTimeField()
     syllabus = models.TextField(blank=True)
@@ -24,6 +25,18 @@ class Cohort(models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def enrolled_students_count(self):
+        return self.students.filter(payment_status="paid").count()
+
+    @property
+    def is_full(self):
+        return self.enrolled_students_count >= self.max_capacity
+
+    @property
+    def remaining_seats(self):
+        return max(0, self.max_capacity - self.enrolled_students_count)
 
     def save(self, *args, **kwargs):
         if not self.slug:

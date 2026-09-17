@@ -1,109 +1,91 @@
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { MdDashboard, MdRefresh } from "react-icons/md";
+import { toast } from "react-toastify";
 import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
-import MetricsGrid from "../components/MetricsGrid";
 import RosterPanel from "../components/RosterPanel";
+import { deleteAdminStudent, getAdminStudents } from "../lib/api";
 import "./AdminPages.css";
-
-const initialStudents = [
-  {
-    id: "001",
-    initials: "KM",
-    name: "Kwame Mensah",
-    email: "kwame.mensah@dev.accra.gh",
-    phone: "+233 24 123 4567",
-    track: "Full-Stack Dev",
-    amount: "GH₵650.00",
-    paymentStatus: "Verified Settled",
-    date: "04 Mar 2026",
-  },
-  {
-    id: "002",
-    initials: "AS",
-    name: "Ama Serwaa",
-    email: "ama.serwaa@knust.alumni.gh",
-    phone: "+233 50 987 6543",
-    track: "Web Foundations",
-    amount: "GH₵400.00",
-    paymentStatus: "Verified Settled",
-    date: "02 Mar 2026",
-  },
-  {
-    id: "003",
-    initials: "KA",
-    name: "Kofi Asante",
-    email: "kofi.asante@techie.gh",
-    phone: "+233 20 555 0198",
-    track: "Full-Stack Dev",
-    amount: "GH₵650.00",
-    paymentStatus: "Verified Settled",
-    date: "28 Feb 2026",
-  },
-  {
-    id: "004",
-    initials: "EY",
-    name: "Esi Yeboah",
-    email: "esi.yeboah@design.gh",
-    phone: "+233 27 444 8102",
-    track: "Web Foundations",
-    amount: "GH₵400.00",
-    paymentStatus: "Verified Settled",
-    date: "24 Feb 2026",
-  },
-  {
-    id: "005",
-    initials: "YA",
-    name: "Yaw Acheampong",
-    email: "yaw.ach@accra.io",
-    phone: "+233 24 991 2304",
-    track: "Full-Stack Dev",
-    amount: "GH₵650.00",
-    paymentStatus: "Pending Reconciliation",
-    date: "23 Feb 2026",
-  },
-  {
-    id: "006",
-    initials: "AB",
-    name: "Abena Boateng",
-    email: "abena.b@builder.gh",
-    phone: "+233 55 312 8841",
-    track: "Web Foundations",
-    amount: "GH₵400.00",
-    paymentStatus: "Verified Settled",
-    date: "20 Feb 2026",
-  },
-  {
-    id: "007",
-    initials: "DA",
-    name: "David Annan",
-    email: "david.annan@legon.edu.gh",
-    phone: "+233 20 882 1190",
-    track: "Full-Stack Dev",
-    amount: "GH₵650.00",
-    paymentStatus: "Verified Settled",
-    date: "18 Feb 2026",
-  },
-  {
-    id: "008",
-    initials: "PO",
-    name: "Priscilla Osei",
-    email: "priscilla.osei@codex.gh",
-    phone: "+233 24 670 4411",
-    track: "Web Foundations",
-    amount: "GH₵400.00",
-    paymentStatus: "Verified Settled",
-    date: "15 Feb 2026",
-  },
-];
 
 function AdminStudents({ onNavigate, currentPath }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [track, setTrack] = useState("All Tracks");
   const [payment, setPayment] = useState("All Payment Status");
 
+  const handleRefresh = async (showToast = true) => {
+    try {
+      setLoading(true);
+      const data = await getAdminStudents();
+      if (data && data.students) {
+        setStudents(data.students);
+      }
+      if (showToast) toast.success("Student directory refreshed.");
+    } catch {
+      toast.error("Unable to reach server to refresh directory.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteStudent = async (studentId, studentName) => {
+    if (
+      !window.confirm(
+        `Are you sure you want to delete the student admission record for "${studentName}"? This cannot be undone.`,
+      )
+    ) {
+      return;
+    }
+    try {
+      await deleteAdminStudent(studentId);
+      toast.success(`Student admission for "${studentName}" deleted.`);
+      handleRefresh(false);
+    } catch (err) {
+      toast.error(err.message || "Failed to delete student admission.");
+    }
+  };
+
+  useEffect(() => {
+    let ignore = false;
+    getAdminStudents()
+      .then((data) => {
+        if (!ignore && data && data.students) {
+          setStudents(data.students);
+        }
+      })
+      .catch(() => {
+        // Keep empty array on error
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const stats = useMemo(() => {
+    const total = students.length;
+    const verified = students.filter(
+      (s) =>
+        s.paymentStatus === "Verified Settled" || s.payment_status === "paid",
+    ).length;
+    const pending = total - verified;
+    const fullstack = students.filter((s) =>
+      s.track.toLowerCase().includes("full"),
+    ).length;
+    const foundations = students.filter((s) =>
+      s.track.toLowerCase().includes("foundation"),
+    ).length;
+
+    return { total, verified, pending, fullstack, foundations };
+  }, [students]);
+
   const filteredStudents = useMemo(() => {
-    return initialStudents.filter((student) => {
+    return students.filter((student) => {
       const matchSearch =
         search === "" ||
         student.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -112,15 +94,21 @@ function AdminStudents({ onNavigate, currentPath }) {
 
       const matchTrack =
         track === "All Tracks" ||
-        (track === "Full-Stack Dev" && student.track.includes("Full-Stack")) ||
-        (track === "Web Foundations" && student.track.includes("Foundations"));
+        (track === "Full-Stack Dev" &&
+          student.track.toLowerCase().includes("full")) ||
+        (track === "Web Foundations" &&
+          student.track.toLowerCase().includes("foundation"));
 
       const matchPayment =
-        payment === "All Payment Status" || student.paymentStatus === payment;
+        payment === "All Payment Status" ||
+        student.paymentStatus === payment ||
+        (payment === "Verified Settled" && student.payment_status === "paid") ||
+        (payment === "Pending Reconciliation" &&
+          student.payment_status !== "paid");
 
       return matchSearch && matchTrack && matchPayment;
     });
-  }, [search, track, payment]);
+  }, [students, search, track, payment]);
 
   return (
     <div className="admin-shell">
@@ -131,27 +119,63 @@ function AdminStudents({ onNavigate, currentPath }) {
         currentPath={currentPath}
       />
       <main className="admin-main">
-        <Topbar onMenu={() => setSidebarOpen(true)} />
+        <Topbar onMenu={() => setSidebarOpen(true)} onNavigate={onNavigate} />
         <div className="admin-content">
           <div className="admin-page-heading">
             <div>
-              <p className="admin-kicker">COHORT 001 / REGISTRAR</p>
-              <h1>Student Roster &amp; Metrics</h1>
+              <p className="admin-kicker">COHORT REGISTRAR · DIRECTORY</p>
+              <h1>Student Directory &amp; Roster</h1>
               <p>
-                Enrollment, fee clearance, and academic progress for the current
-                intake.
+                Search, filter, inspect clearance status, and export student
+                enrollment records.
               </p>
             </div>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                className="outline-button"
+                type="button"
+                onClick={handleRefresh}
+                title="Refresh directory"
+              >
+                <MdRefresh /> Refresh
+              </button>
+              <button
+                className="admin-primary"
+                type="button"
+                onClick={() => onNavigate("/admin/overview")}
+              >
+                <MdDashboard /> Admin Overview
+              </button>
+            </div>
           </div>
-          <MetricsGrid
-            totalRevenue="GH₵21,500.00"
-            totalStudents={40}
-            maxCap={50}
-            foundationsCount={18}
-            foundationsRevenue="GH₵7,200.00"
-            fullstackCount={22}
-            fullstackRevenue="GH₵14,300.00"
-          />
+
+          <div className="directory-stats-row">
+            <div className="directory-stat-card">
+              <span className="stat-label">Total Registered</span>
+              <strong className="stat-value">{stats.total}</strong>
+              <span className="stat-sub">Active cohort admissions</span>
+            </div>
+            <div className="directory-stat-card">
+              <span className="stat-label">Verified Settled</span>
+              <strong className="stat-value text-green">
+                {stats.verified}
+              </strong>
+              <span className="stat-sub">Paid via Paystack / MoMo</span>
+            </div>
+            <div className="directory-stat-card">
+              <span className="stat-label">Pending Verification</span>
+              <strong className="stat-value text-amber">{stats.pending}</strong>
+              <span className="stat-sub">Awaiting clearance</span>
+            </div>
+            <div className="directory-stat-card">
+              <span className="stat-label">Track Distribution</span>
+              <strong className="stat-value">
+                {stats.fullstack} / {stats.foundations}
+              </strong>
+              <span className="stat-sub">Full-Stack / Foundations</span>
+            </div>
+          </div>
+
           <RosterPanel
             students={filteredStudents}
             search={search}
@@ -160,7 +184,9 @@ function AdminStudents({ onNavigate, currentPath }) {
             onTrackChange={setTrack}
             payment={payment}
             onPaymentChange={setPayment}
-            totalCount={40}
+            totalCount={students.length}
+            loading={loading}
+            onDeleteStudent={handleDeleteStudent}
           />
         </div>
       </main>
