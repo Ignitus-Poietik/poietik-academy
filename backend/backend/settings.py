@@ -157,6 +157,7 @@ FRONTEND_URL = FRONTEND_URLS[0] if FRONTEND_URLS else 'http://localhost:5173'
 
 extra_cors = [url.strip().rstrip('/') for url in os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',') if url.strip()]
 CORS_ALLOWED_ORIGINS = list(dict.fromkeys(FRONTEND_URLS + extra_cors + [
+    'https://poietik-academy-c5oiqyzls-ignitus-poietik.vercel.app',
     'http://localhost:5173',
     'http://127.0.0.1:5173',
     'http://localhost:3000',
@@ -170,6 +171,7 @@ CORS_ALLOW_CREDENTIALS = True
 extra_csrf = [url.strip().rstrip('/') for url in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if url.strip()]
 CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(
     FRONTEND_URLS + extra_csrf + [
+        'https://poietik-academy-c5oiqyzls-ignitus-poietik.vercel.app',
         'http://localhost:5173',
         'http://127.0.0.1:5173',
         'http://localhost:3000',
