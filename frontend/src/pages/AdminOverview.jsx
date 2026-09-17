@@ -85,7 +85,7 @@ function AdminOverview({ onNavigate, currentPath }) {
                 gauges, and gateway health.
               </p>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div>
               <button
                 className="outline-button"
                 type="button"
@@ -357,12 +357,11 @@ function AdminOverview({ onNavigate, currentPath }) {
                 <h2>Latest Student Registrations</h2>
               </div>
               <button
-                className="solid-button"
+                className="admin-primary"
                 type="button"
                 onClick={() => onNavigate("/admin/students")}
-                style={{ padding: "8px 14px", fontSize: "11px" }}
               >
-                <MdPeople /> Open Full Student Directory <MdArrowForward />
+                <MdPeople /> Open Student Directory <MdArrowForward />
               </button>
             </div>
 

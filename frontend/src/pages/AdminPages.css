@@ -8,17 +8,36 @@
   min-width: 0;
   flex: 1;
 }
+/* Only the content area fades in — sidebar stays completely stable during navigation */
 .admin-content {
   max-width: 1500px;
   margin: 0 auto;
   padding: 38px 42px 60px;
+  animation: adminContentFadeIn 0.22s ease-out both;
+}
+@keyframes adminContentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .admin-page-heading {
   display: flex;
   justify-content: space-between;
-  align-items: end;
+  align-items: center;
   gap: 25px;
   margin-bottom: 28px;
+}
+/* Action button groups in the page heading */
+.admin-page-heading > div:last-child {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 .admin-kicker,
 .card-heading > div > span {
@@ -137,7 +156,8 @@
 .card-heading {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: center;
+  gap: 12px;
   margin-bottom: 23px;
 }
 .card-heading h2 {

@@ -172,24 +172,25 @@ tbody tr:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   padding: 14px 18px;
   background: #fcfdfe;
   border-top: 1px solid #edf0f2;
   color: #64748b;
   font-size: 11px;
+  flex-wrap: wrap;
 }
 .footer-summary strong {
   color: var(--ink);
 }
-.pagination-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+.filtered-note {
+  color: #94a3b8;
 }
 .pagination-controls {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
 }
 .page-nav-btn {
   display: inline-flex;
@@ -236,6 +237,15 @@ tbody tr:hover {
   border-color: var(--orange);
   color: #fff;
   font-weight: 700;
+}
+.page-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  min-width: 20px;
+  padding: 0 2px;
+  color: #94a3b8;
+  font-size: 13px;
+  user-select: none;
 }
 .roster-export-btn {
   display: inline-flex;
@@ -304,13 +314,12 @@ tbody tr:hover {
     margin-left: 0;
   }
   .panel-footer {
-    align-items: start;
-    gap: 14px;
+    align-items: flex-start;
     flex-direction: column;
+    gap: 14px;
   }
-  .pagination-bar {
+  .pagination-controls {
     width: 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
+    justify-content: center;
   }
 }

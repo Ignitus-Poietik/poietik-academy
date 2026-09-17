@@ -130,7 +130,7 @@ function AdminStudents({ onNavigate, currentPath }) {
                 enrollment records.
               </p>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div>
               <button
                 className="outline-button"
                 type="button"

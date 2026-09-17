@@ -316,7 +316,7 @@ function AdminCohorts({ onNavigate, currentPath }) {
                 and early-bird deadlines.
               </p>
             </div>
-            <div style={{ display: "flex", gap: "10px" }}>
+            <div>
               <button
                 className="outline-button"
                 type="button"

@@ -12,6 +12,14 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "./App.css";
 
+const ADMIN_PATHS = [
+  "/admin",
+  "/admin/",
+  "/admin/overview",
+  "/admin/cohorts",
+  "/admin/students",
+];
+
 function App() {
   const [path, setPath] = useState(window.location.pathname);
   useEffect(() => {
@@ -24,29 +32,33 @@ function App() {
     setPath(nextPath.split("?")[0]);
     window.scrollTo(0, 0);
   };
-  let screen = <LandingPage onNavigate={navigate} />;
-  if (path === "/enroll") screen = <EnrollPage onNavigate={navigate} />;
-  if (path === "/enrollment/success")
-    screen = <SuccessPage onNavigate={navigate} />;
-  if (path === "/admin/login") screen = <AdminLogin onNavigate={navigate} />;
-  if (path === "/admin" || path === "/admin/" || path === "/admin/overview")
-    screen = (
-      <AdminGuard onNavigate={navigate}>
+
+  const isAdminRoute = ADMIN_PATHS.includes(path) || path.startsWith("/admin/");
+  const isAdminLogin = path === "/admin/login";
+
+  // Public pages — full-page slide-fade animation
+  let publicScreen = null;
+  if (!isAdminRoute && !isAdminLogin) {
+    if (path === "/enroll") publicScreen = <EnrollPage onNavigate={navigate} />;
+    else if (path === "/enrollment/success")
+      publicScreen = <SuccessPage onNavigate={navigate} />;
+    else publicScreen = <LandingPage onNavigate={navigate} />;
+  }
+
+  // Admin page content (no wrapper animation — CSS handles it on admin-content)
+  let adminScreen = null;
+  if (isAdminRoute && !isAdminLogin) {
+    if (path === "/admin" || path === "/admin/" || path === "/admin/overview") {
+      adminScreen = (
         <AdminOverview onNavigate={navigate} currentPath="/admin/overview" />
-      </AdminGuard>
-    );
-  if (path === "/admin/cohorts")
-    screen = (
-      <AdminGuard onNavigate={navigate}>
-        <AdminCohorts onNavigate={navigate} currentPath={path} />
-      </AdminGuard>
-    );
-  if (path === "/admin/students")
-    screen = (
-      <AdminGuard onNavigate={navigate}>
-        <AdminStudents onNavigate={navigate} currentPath={path} />
-      </AdminGuard>
-    );
+      );
+    } else if (path === "/admin/cohorts") {
+      adminScreen = <AdminCohorts onNavigate={navigate} currentPath={path} />;
+    } else if (path === "/admin/students") {
+      adminScreen = <AdminStudents onNavigate={navigate} currentPath={path} />;
+    }
+  }
+
   return (
     <MotionConfig reducedMotion="user">
       <ToastContainer
@@ -61,18 +73,31 @@ function App() {
         pauseOnHover
         theme="light"
       />
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={path}
-          className="route-screen"
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.48, ease: [0.25, 0.46, 0.45, 0.94] }}
-        >
-          {screen}
-        </motion.div>
-      </AnimatePresence>
+
+      {/* Admin login — simple, no animation */}
+      {isAdminLogin && <AdminLogin onNavigate={navigate} />}
+
+      {/* Admin routes — sidebar is rendered INSIDE each page component and stays stable.
+          No AnimatePresence here. The .admin-content div uses a CSS keyframe fade-in. */}
+      {isAdminRoute && !isAdminLogin && (
+        <AdminGuard onNavigate={navigate}>{adminScreen}</AdminGuard>
+      )}
+
+      {/* Public pages — full page slide-fade */}
+      {!isAdminRoute && !isAdminLogin && (
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={path}
+            className="route-screen"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+          >
+            {publicScreen}
+          </motion.div>
+        </AnimatePresence>
+      )}
     </MotionConfig>
   );
 }

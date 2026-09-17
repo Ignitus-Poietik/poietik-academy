@@ -9,6 +9,8 @@ import {
   MdChatBubbleOutline,
   MdCheckCircle,
   MdHourglassEmpty,
+  MdFirstPage,
+  MdLastPage,
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import "./RosterPanel.css";
@@ -42,7 +44,8 @@ function RosterPanel({
   const endIndex = Math.min(safePage * pageSize, students.length);
 
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    const clamped = Math.min(Math.max(1, page), totalPages);
+    setCurrentPage(clamped);
   };
 
   const handleExport = () => {
@@ -86,20 +89,32 @@ function RosterPanel({
     toast.success(`Exported ${students.length} student records to CSV!`);
   };
 
-  // Generate pagination buttons
-  const pageNumbers = [];
-  const maxButtons = 5;
-  let startBtn = Math.max(1, safePage - Math.floor(maxButtons / 2));
-  let endBtn = Math.min(totalPages, startBtn + maxButtons - 1);
-  if (endBtn - startBtn + 1 < maxButtons) {
-    startBtn = Math.max(1, endBtn - maxButtons + 1);
-  }
-  for (let i = startBtn; i <= endBtn; i++) {
-    pageNumbers.push(i);
-  }
+  // Build page number array with ellipsis markers for large page ranges
+  const pageNumbers = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    const pages = [];
+    const delta = 2; // siblings around current page
+    const left = safePage - delta;
+    const right = safePage + delta;
+
+    pages.push(1);
+    if (left > 2) pages.push("...");
+
+    for (let i = Math.max(2, left); i <= Math.min(totalPages - 1, right); i++) {
+      pages.push(i);
+    }
+
+    if (right < totalPages - 1) pages.push("...");
+    pages.push(totalPages);
+
+    return pages;
+  }, [safePage, totalPages]);
 
   return (
     <section className="roster-panel">
+      {/* ── Toolbar: search, filters, rows-per-page ── */}
       <div className="panel-toolbar">
         <label className="search-box">
           <MdSearch />
@@ -152,11 +167,13 @@ function RosterPanel({
             <option value={10}>10 per page</option>
             <option value={25}>25 per page</option>
             <option value={50}>50 per page</option>
+            <option value={100}>100 per page</option>
           </select>
           <MdExpandMore />
         </label>
       </div>
 
+      {/* ── Table ── */}
       <div className="table-wrap">
         <table>
           <thead>
@@ -244,67 +261,111 @@ function RosterPanel({
         )}
       </div>
 
+      {/* ── Footer: record summary · pagination · export ── */}
       <div className="panel-footer">
+        {/* Left — record count */}
         <div className="footer-summary">
           {students.length > 0 ? (
             <span>
-              Showing <strong>{startIndex}</strong> to{" "}
-              <strong>{endIndex}</strong> of <strong>{students.length}</strong>{" "}
-              students
+              Showing <strong>{startIndex}</strong>–<strong>{endIndex}</strong>{" "}
+              of <strong>{students.length}</strong>
               {totalCount > students.length && (
-                <span> (filtered from {totalCount} total)</span>
+                <span className="filtered-note">
+                  {" "}
+                  (filtered from {totalCount} total)
+                </span>
               )}
             </span>
           ) : (
-            <span>0 students found</span>
+            <span>No students found</span>
           )}
         </div>
 
-        <div className="pagination-bar">
-          {totalPages > 1 && (
-            <div className="pagination-controls">
-              <button
-                type="button"
-                className="page-nav-btn"
-                disabled={safePage <= 1}
-                onClick={() => handlePageChange(safePage - 1)}
-                title="Previous Page"
-              >
-                <MdChevronLeft /> Prev
-              </button>
+        {/* Centre — page navigation (only when more than 1 page) */}
+        {totalPages > 1 && (
+          <nav
+            className="pagination-controls"
+            aria-label="Student directory pagination"
+          >
+            {/* Jump to first */}
+            <button
+              type="button"
+              className="page-nav-btn"
+              disabled={safePage <= 1}
+              onClick={() => handlePageChange(1)}
+              title="First page"
+              aria-label="Go to first page"
+            >
+              <MdFirstPage />
+            </button>
 
-              {pageNumbers.map((num) => (
+            {/* Previous */}
+            <button
+              type="button"
+              className="page-nav-btn"
+              disabled={safePage <= 1}
+              onClick={() => handlePageChange(safePage - 1)}
+              title="Previous page"
+              aria-label="Go to previous page"
+            >
+              <MdChevronLeft /> Prev
+            </button>
+
+            {/* Page numbers with ellipsis */}
+            {pageNumbers.map((num, idx) =>
+              num === "..." ? (
+                <span key={`ellipsis-${idx}`} className="page-ellipsis">
+                  …
+                </span>
+              ) : (
                 <button
                   key={num}
                   type="button"
                   className={`page-num-btn ${safePage === num ? "is-active" : ""}`}
                   onClick={() => handlePageChange(num)}
+                  aria-label={`Page ${num}`}
+                  aria-current={safePage === num ? "page" : undefined}
                 >
                   {num}
                 </button>
-              ))}
+              ),
+            )}
 
-              <button
-                type="button"
-                className="page-nav-btn"
-                disabled={safePage >= totalPages}
-                onClick={() => handlePageChange(safePage + 1)}
-                title="Next Page"
-              >
-                Next <MdChevronRight />
-              </button>
-            </div>
-          )}
+            {/* Next */}
+            <button
+              type="button"
+              className="page-nav-btn"
+              disabled={safePage >= totalPages}
+              onClick={() => handlePageChange(safePage + 1)}
+              title="Next page"
+              aria-label="Go to next page"
+            >
+              Next <MdChevronRight />
+            </button>
 
-          <button
-            type="button"
-            className="roster-export-btn"
-            onClick={handleExport}
-            title="Download CSV export"
-          >
-            <MdDownload /> Export CSV ({students.length})
-          </button>
-        </div>
+            {/* Jump to last */}
+            <button
+              type="button"
+              className="page-nav-btn"
+              disabled={safePage >= totalPages}
+              onClick={() => handlePageChange(totalPages)}
+              title="Last page"
+              aria-label="Go to last page"
+            >
+              <MdLastPage />
+            </button>
+          </nav>
+        )}
+
+        {/* Right — CSV export */}
+        <button
+          type="button"
+          className="roster-export-btn"
+          onClick={handleExport}
+          title="Download CSV export"
+        >
+          <MdDownload /> Export CSV ({students.length})
+        </button>
       </div>
     </section>
   );
